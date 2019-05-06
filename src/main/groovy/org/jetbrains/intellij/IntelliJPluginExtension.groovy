@@ -1,5 +1,7 @@
 package org.jetbrains.intellij
 
+import java.util.concurrent.Callable
+
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 
@@ -10,7 +12,7 @@ class IntelliJPluginExtension {
     Object[] plugins = []
     String localPath
     String localSourcesPath
-    String version
+    Object version
     String type = 'IC'
     String pluginName
     String sandboxDirectory
@@ -34,18 +36,19 @@ class IntelliJPluginExtension {
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
 
     String getType() {
-        if (version == null) {
+        def resolvedVersion = getVersion()
+        if (resolvedVersion == null) {
             return 'IC'
         }
-        if (version.startsWith('IU-') || 'IU' == type) {
+        if (resolvedVersion.startsWith('IU-') || 'IU' == type) {
             return 'IU'
-        } else if (version.startsWith('JPS-') || 'JPS' == type) {
+        } else if (resolvedVersion.startsWith('JPS-') || 'JPS' == type) {
             return "JPS"
-        } else if (version.startsWith('CL-') || 'CL' == type) {
+        } else if (resolvedVersion.startsWith('CL-') || 'CL' == type) {
             return 'CL'
-        } else if (version.startsWith('RD-') || 'RD' == type) {
+        } else if (resolvedVersion.startsWith('RD-') || 'RD' == type) {
             return 'RD'
-        } else if (version.startsWith('MPS-') || 'MPS' == type) {
+        } else if (resolvedVersion.startsWith('MPS-') || 'MPS' == type) {
             return 'MPS'
         } else {
             return 'IC'
@@ -53,17 +56,26 @@ class IntelliJPluginExtension {
     }
 
     String getVersion() {
+        println "Greetings"
         if (version == null) {
             return null
         }
-        if (version.startsWith('JPS-') || version.startsWith('MPS-')) {
+
+        def resolvedVersion
+        if (version instanceof String) {
+            resolvedVersion = version
+        } else if (version instanceof Callable) {
+            resolvedVersion = version.call()
+        }
+
+        if (resolvedVersion.startsWith('JPS-') || resolvedVersion.startsWith('MPS-')) {
             return version.substring(4)
         }
-        if (version.startsWith('IU-') || version.startsWith('IC-') ||
-                version.startsWith('RD-') || version.startsWith('CL-')) {
-            return version.substring(3)
+        if (resolvedVersion.startsWith('IU-') || resolvedVersion.startsWith('IC-') ||
+            resolvedVersion.startsWith('RD-') || resolvedVersion.startsWith('CL-')) {
+            return resolvedVersion.substring(3)
         }
-        return version
+        return resolvedVersion
     }
 
     Set<PluginDependency> getPluginDependencies() {

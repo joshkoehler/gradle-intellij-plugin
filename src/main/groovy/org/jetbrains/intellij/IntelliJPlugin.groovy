@@ -84,6 +84,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
+        println 'configuring'
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
@@ -107,6 +108,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
             def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
             if (subprojectExtension) {
+                println 'afterEvaluate'
                 configureProjectAfterEvaluate(subproject, subprojectExtension)
             }
         }
